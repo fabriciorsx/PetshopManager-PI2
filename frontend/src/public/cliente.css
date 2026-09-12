@@ -1,0 +1,373 @@
+/* CONFIGURAÇÕES GERAIS */
+
+:root {
+    --fundo: #DFEFF5;
+    --branco: #ffffff;
+    --fundo-claro: #E4EFF2;
+    --botao: #a2c4cf;
+    --texto: #3f474d;
+    --texto-escuro: #285665;
+    --titulo: #527481;
+    --borda: #74a5b7;
+    --borda-clara: #d5e0e4;
+    --campo: #fbfcfd;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--fundo);
+    color: var(--texto);
+    min-height: 100vh;
+    padding: 10px 0;
+}
+
+main {
+    width: 100%;
+    max-width: 1074px;
+    margin: 0 auto;
+}
+
+
+/* NAVEGAÇÃO E BOTÕES */
+
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+button {
+    min-width: 130px;
+    height: 38px;
+    padding: 6px 15px;
+    border: 1px solid var(--borda);
+    border-radius: 7px;
+    background-color: var(--botao);
+    color: var(--texto-escuro);
+    font: bold 15px Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: var(--fundo-claro);
+}
+button:disabled {
+    background-color: #d6d6d6;
+    color: #999;
+    border-color: #c5c5c5;
+    cursor: not-allowed;
+}
+
+
+/* FORMULÁRIO E TÍTULOS */
+
+form {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(63, 71, 77, 0.08);
+}
+
+h1,
+h2,
+h3 {
+    color: var(--titulo);
+}
+
+h1 {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 21px;
+    margin-bottom: 3px;
+}
+
+h2 {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+h3 {
+    font-size: 16px;
+    margin-bottom: 7px;
+}
+
+
+/* CAMPOS */
+
+.campo {
+    width: 100%;
+}
+
+label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    border: 1px solid var(--borda);
+    border-radius: 7px;
+    padding: 7px 8px;
+    background-color: var(--campo);
+    color: var(--texto);
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+}
+
+input,
+select {
+    height: 38px;
+}
+
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--borda);
+    box-shadow: 0 0 0 2px rgba(127, 174, 186, 0.15);
+}
+
+/* QUADROS */
+
+.quadro {
+    padding: 10px;
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+    background-color: var(--fundo-claro);
+}
+
+
+/* DADOS DO CLIENTE */
+
+#dadosCliente {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px 18px;
+}
+
+#dadosCliente .campo-nome,
+#dadosCliente .campo-endereco {
+    grid-column: 1 / -1;
+}
+
+#dadosCliente .campo-data {
+    width: 50%;
+    justify-self: end;
+}
+/* LISTA DE PETS */
+
+#listaPets {
+    margin-top: 12px;
+}
+
+/* DADOS DO PET */
+
+#dadosPet {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px 18px;
+    margin-top: 12px;
+}
+
+#dadosPet .campo {
+    grid-column: span 1;
+}
+
+#dadosPet .campo-nome-pet,
+#dadosPet .campo-raca {
+    grid-column: span 3;
+}
+
+#dadosPet .campo-tipo-outro {
+    grid-column: span 2;
+}
+
+
+/* QUADROS INTERNOS DO PET */
+
+#dadosPet .quadro {
+    background-color: #f2f8fa;
+}
+
+.quadro-caracteristicas {
+    grid-column: 1 / 3;
+}
+
+.quadro-servico {
+    grid-column: 3 / 5;
+}
+
+.quadro-observacoes {
+    grid-column: 5 / 7;
+}
+
+#dadosPet .quadro textarea {
+    min-height: 105px;
+}
+
+/* BUSCA DE CLIENTE */
+
+#buscaCliente {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: var(--fundo-claro);
+    border: 1px solid var(--borda);
+    border-radius: 9px;
+}
+
+.area-pesquisa {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.area-pesquisa .campo {
+    flex: 1;
+}
+
+/* TABELAS */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 6px 8px;
+    text-align: left;
+    border: 1px solid var(--borda-clara);
+    font-size: 14px;
+}
+
+th {
+    background-color: var(--fundo-claro);
+    color: var(--texto-escuro);
+}
+
+tbody tr:hover {
+    background-color: var(--fundo-claro);
+}
+
+/* AÇÕES DO FORMULÁRIO */
+
+#acoesFormulario {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--borda);
+}
+
+
+/* ELEMENTOS OCULTOS */
+
+[hidden] {
+    display: none !important;
+}
+
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+
+    body { padding: 12px;}
+
+    form { padding: 15px;}
+
+    #dadosPet {grid-template-columns: repeat(2, 1fr);}
+
+    #dadosPet .campo,
+    .quadro-caracteristicas,
+    .quadro-servico,
+    .quadro-observacoes {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 650px) {
+
+    body {padding: 10px;}
+
+    form { padding: 12px;}
+
+    nav {flex-direction: column;}
+
+    nav button,
+    .area-pesquisa button,
+    #acoesFormulario button {
+        width: 100%;
+    }
+
+    #dadosCliente,
+    #dadosPet {
+        grid-template-columns: 1fr;
+    }
+
+    #dadosCliente .campo,
+    #dadosPet .campo,
+    .quadro-caracteristicas,
+    .quadro-servico,
+    .quadro-observacoes {
+        grid-column: 1;
+        width: 100%;
+    }
+
+    #dadosCliente .campo-data {
+        width: 100%;
+    }
+
+    .area-pesquisa {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #acoesFormulario {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+#btnSalvarAlteracoes:disabled {
+    background: #d6d6d6;
+    color: #999;
+    border-color: #c5c5c5;
+    cursor: not-allowed;
+}
+
+#btnSalvarAlteracoes {
+    white-space: nowrap;
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas</title>
+    <link rel="stylesheet" href="vendas.css">
+</head>
+<body>
+    <main>
+
+        <!-- AÇÕES PRINCIPAIS -->
+        <nav aria-label="Ações principais">
+            <button type="button" id="btnNovaVenda">Nova Venda</button>
+            <button type="button" id="btnBuscarVenda">Buscar Venda</button>
+        </nav>
+
+        <!-- FORMULÁRIO DA VENDA -->
+        <form id="formVenda">
+            <input type="hidden" id="idVenda" name="idVenda">
+
+            <!-- DADOS DA VENDA -->
+            <section id="dadosVenda">
+                <h1>Venda</h1>
+                <h2>Tipo de Venda</h2>
+
+                <div id="linhaDadosVenda">
+                    <div class="tipoVenda">
+                        <label>
+                            <input type="radio" name="tipoVenda" value="cliente" checked>
+                            Venda para Cliente
+                        </label>
+                        <label>
+                            <input type="radio" name="tipoVenda" value="externa">
+                            Venda Externa
+                        </label>
+                    </div>
+
+                    <div class="campo">
+                        <label for="numeroVenda">Número da Venda</label>
+                        <input type="text" id="numeroVenda" name="numeroVenda"
+                               placeholder="Número da venda" readonly>
+                    </div>
+
+                    <div class="campo">
+                        <label for="dataVenda">Data da Venda</label>
+                        <input type="date" id="dataVenda" name="dataVenda">
+                    </div>
+                </div>
+            </section>
+
+            <!-- CLIENTE E PET -->
+            <section id="dadosCliente">
+                <h2>Cliente e Pet</h2>
+
+                <!-- BUSCA DE CLIENTE -->
+                <div class="subdivisao" id="buscaClienteVenda">
+                <h3>Busca de Cliente</h3>
+
+                    <div class="area-pesquisa">
+                        <div class="campo">
+                            <label for="campoBuscaCliente">Nome, telefone ou CPF/CNPJ</label>
+                            <input type="search" id="campoBuscaCliente" name="campoBuscaCliente"
+                                   placeholder="Digite para buscar o cliente...">
+                        </div>
+                        <button type="button" id="btnPesquisarCliente">Pesquisar</button>
+                    </div>
+                </div>
+
+                <!-- DADOS DO CLIENTE -->
+                <div class="dadosGrupo" id="dadosClienteSelecionado" hidden>
+                    <div class="campo">
+                        <label for="clienteSelecionado">Cliente</label>
+                        <input type="text" id="clienteSelecionado" name="clienteSelecionado"
+                               placeholder="Cliente selecionado" readonly>
+                    </div>
+
+                    <div class="campo">
+                        <label for="telefoneCliente">Telefone</label>
+                        <input type="text" id="telefoneCliente" name="telefoneCliente" readonly>
+                    </div>
+
+                    <div class="campo">
+                        <label for="cpfCnpjCliente">CPF/CNPJ</label>
+                        <input type="text" id="cpfCnpjCliente" name="cpfCnpjCliente" readonly>
+                    </div>
+                </div>
+
+                <!-- DADOS DO PET -->
+                <section id="dadosPet" class="subdivisao" hidden>
+                    <h3>Dados do Pet</h3>
+
+                    <div class="dadosGrupo">
+                        <div class="campo">
+                            <label for="petSelecionado">Pet</label>
+                            <select id="petSelecionado" name="petSelecionado">
+                                <option value="">Selecione o pet</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="ultimaVisita">Última Visita</label>
+                            <input type="date" id="ultimaVisita" name="ultimaVisita" readonly>
+                        </div>
+
+                        <button type="button" id="btnHistoricoVisitas">Histórico de Visitas</button>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ITENS DA VENDA -->
+            <section id="itensVenda">
+                <h2>Produtos e Serviços</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Produto / Serviço</th>
+                            <th>Quantidade</th>
+                            <th>Valor Unitário</th>
+                            <th>Desconto</th>
+                            <th>Total</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaItensVenda"></tbody>
+                </table>
+
+                <button type="button" id="btnAdicionarItem">+ Adicionar Item</button>
+            </section>
+
+            <!-- VALORES DA VENDA -->
+            <section id="valoresVenda">
+                <h2>Valores da Venda</h2>
+
+                <div class="campo">
+                    <label for="valorBruto">Valor Bruto da Venda</label>
+                    <input type="number" id="valorBruto" name="valorBruto"
+                           step="0.01" min="0" readonly>
+                </div>
+
+                <div class="campo">
+                    <label for="descontoVenda">Desconto ao Cliente</label>
+                    <input type="number" id="descontoVenda" name="descontoVenda"
+                           step="0.01" min="0" value="0">
+                </div>
+
+                <div class="campo">
+                    <label for="valorVenda">Valor da Venda</label>
+                    <input type="number" id="valorVenda" name="valorVenda"
+                           step="0.01" min="0" readonly>
+                </div>
+
+                <div class="campo">
+                    <label for="taxaPagamento">Taxa da Forma de Pagamento</label>
+                    <input type="number" id="taxaPagamento" name="taxaPagamento"
+                           step="0.01" min="0" value="0">
+                </div>
+
+                <div class="campo">
+                    <label for="valorLiquido">Valor Líquido Recebido</label>
+                    <input type="number" id="valorLiquido" name="valorLiquido"
+                           step="0.01" min="0" readonly>
+                </div>
+            </section>
+
+            <!-- PAGAMENTO -->
+            <section id="pagamentoVenda">
+                <h2>Pagamento</h2>
+
+                <div class="campo">
+                    <label for="formaPagamento">Forma de Pagamento</label>
+                    <select id="formaPagamento" name="formaPagamento">
+                        <option value="">Selecione</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="pix">Pix</option>
+                        <option value="debito">Cartão de Débito</option>
+                        <option value="credito">Cartão de Crédito</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="valorRecebido">Valor Recebido</label>
+                    <input type="number" id="valorRecebido" name="valorRecebido"
+                           step="0.01" min="0">
+                </div>
+
+                <div class="campo">
+                    <label for="troco">Troco</label>
+                    <input type="number" id="troco" name="troco"
+                           step="0.01" min="0" readonly>
+                </div>
+
+                <div class="campo">
+                    <label for="observacoes">Observações</label>
+                    <input type="text" id="observacoes" name="observacoes"
+                           placeholder="Observações sobre a venda">
+                </div>
+            </section>
+
+            <!-- AÇÕES DO FORMULÁRIO -->
+            <div id="acoesFormulario">
+                <button type="button" id="btnSalvarVenda">Salvar</button>
+                <button type="button" id="btnEditarVenda">Editar</button>
+                <button type="button" id="btnExcluirVenda">Excluir</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="vendas.js"></script>
+</body>
+</html>

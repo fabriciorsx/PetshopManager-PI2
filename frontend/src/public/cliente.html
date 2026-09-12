@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cliente</title>
+    <link rel="stylesheet" href="cliente.css">
+</head>
+<body>
+    <main>
+
+        <!-- AÇÕES PRINCIPAIS -->
+        <nav aria-label="Ações principais">
+            <button type="button" id="btnNovo">Novo</button>
+            <button type="button" id="btnBuscarCliente">Buscar Cliente</button>
+        </nav>
+
+        <!-- BUSCA DE CLIENTE -->
+        <section id="buscaCliente" hidden>
+            <h2>Buscar Cliente</h2>
+
+            <div class="area-pesquisa">
+                <div class="campo">
+                    <label for="campoBusca">Nome, telefone ou CPF/CNPJ</label>
+                    <input type="search" id="campoBusca" name="campoBusca"
+                           placeholder="Digite para buscar...">
+                </div>
+
+                <button type="button" id="btnPesquisar">Pesquisar</button>
+            </div>
+
+            <!-- RESULTADO DA BUSCA -->
+            <div id="listaClientes" hidden>
+                <h3>Clientes encontrados</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Data do Registro</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaClientes"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FORMULÁRIO -->
+        <form id="formClientePet">
+
+            <input type="hidden" id="idCliente" name="idCliente">
+
+            <!-- DADOS DO CLIENTE -->
+            <section id="dadosCliente" class="quadro">
+                <h1>Cliente</h1>
+
+                <div class="campo campo-nome">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Nome do cliente">
+                </div>
+
+                <div class="campo campo-telefone">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" name="telefone" placeholder="Telefone">
+                </div>
+
+                <div class="campo campo-email">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="E-mail">
+                </div>
+
+                <div class="campo campo-endereco">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" name="endereco" placeholder="Endereço">
+                </div>
+
+                <div class="campo campo-cpf">
+                    <label for="cpfCnpj">CPF/CNPJ</label>
+                    <input type="text" id="cpfCnpj" name="cpfCnpj" placeholder="CPF ou CNPJ">
+                </div>
+
+                <div class="campo campo-data">
+                    <label for="dataRegistro">Data do Registro</label>
+                    <input type="date" id="dataRegistro" name="dataRegistro">
+                </div>
+            </section>
+
+            <!-- LISTA DE PETS -->
+            <section id="listaPets" hidden>
+                <h3>Pets cadastrados</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Raça</th>
+                            <th>Sexo</th>
+                            <th>Porte</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaPets"></tbody>
+                </table>
+            </section>
+
+            <!-- DADOS DO PET -->
+            <section id="dadosPet" class="quadro">
+                <h2>Pet</h2>
+
+                <input type="hidden" id="idPet" name="idPet">
+
+                <div class="campo campo-nome-pet">
+                    <label for="nomePet">Nome do Pet</label>
+                    <input type="text" id="nomePet" name="nomePet" placeholder="Nome do pet">
+                </div>
+
+                <div class="campo campo-sexo">
+                    <label for="sexo">Sexo</label>
+                    <select id="sexo" name="sexo">
+                        <option value="">Selecione</option>
+                        <option value="macho">Macho</option>
+                        <option value="femea">Fêmea</option>
+                    </select>
+                </div>
+
+                <div class="campo campo-tipo">
+                    <label for="tipoPet">Tipo</label>
+                    <select id="tipoPet" name="tipoPet">
+                        <option value="">Selecione</option>
+                        <option value="cao">Cão</option>
+                        <option value="gato">Gato</option>
+                        <option value="outros">Outros</option>
+                    </select>
+                </div>
+
+                <div class="campo campo-raca">
+                    <label for="raca">Raça</label>
+                    <input type="text" id="raca" name="raca" placeholder="Raça">
+                </div>
+
+                <div class="campo campo-porte">
+                    <label for="porte">Porte</label>
+                    <select id="porte" name="porte">
+                        <option value="">Selecione</option>
+                        <option value="pequeno">Pequeno</option>
+                        <option value="medio">Médio</option>
+                        <option value="grande">Grande</option>
+                    </select>
+                </div>
+
+                <div class="campo campo-tipo-outro" id="campoTipoOutro" hidden>
+                    <label for="tipoOutro">Digite o tipo</label>
+                    <input type="text" id="tipoOutro" name="tipoOutro"
+                           placeholder="Digite o tipo do pet">
+                </div>
+
+                <!-- QUADROS DO PET -->
+                <div class="quadro quadro-caracteristicas">
+                    <label for="caracteristicasPet">Características do Pet</label>
+                    <textarea id="caracteristicasPet" name="caracteristicasPet"
+                              rows="5" placeholder="Descreva as características do pet"></textarea>
+                </div>
+
+                <div class="quadro quadro-servico">
+                    <label for="detalhesServico">Detalhes do Serviço</label>
+                    <textarea id="detalhesServico" name="detalhesServico"
+                              rows="5" placeholder="Descreva os detalhes do serviço"></textarea>
+                </div>
+
+                <div class="quadro quadro-observacoes">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" name="observacoes"
+                              rows="5" placeholder="Observações"></textarea>
+                </div>
+            </section>
+
+            <!-- AÇÕES DO FORMULÁRIO -->
+            <div id="acoesFormulario">
+
+           <button type="button" id="btnNovoPet" disabled>Novo Pet</button>
+           
+            <button type="button" 
+            id="btnSalvar">Cadastrar</button>
+            <button type="button" id="btnEditar">Editar</button>
+            <button type="button" id="btnSalvarAlteracoes" disabled>Salvar alterações</button>
+            <button type="button" id="btnExcluir">Excluir</button>
+            </div>
+
+        </form>
+    </main>
+
+    <script src="cliente.js"></script>
+</body>
+</html>
