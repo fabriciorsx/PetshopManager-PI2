@@ -1,16 +1,246 @@
-// CONVERTE TEXTO PARA MAIÚSCULAS
+// =====================================================
+// CONFIGURAÇÃO DA API
+// =====================================================
 
-document.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(function(campo) {
-    campo.addEventListener("input", function() {
-        this.value = this.value.toUpperCase();
+const API_URL = "http://localhost:3000/api";
+
+// Mapa: id do campo no formulário -> campo do model Prisma
+const MAP_CLIENTE = {
+    nome: "nomeCompleto",
+    cpfCnpj: "cpf",
+    telefone: "telefone",
+    email: "email",
+    endereco: "endereco",
+    numero: "numero",
+    complemento: "complemento",
+    bairro: "bairro",
+    cidade: "cidade",
+    estado: "estado",
+    cep: "cep"
+};
+
+const MAP_PET = {
+    nomePet: "nome",
+    tipoPet: "especie",
+    raca: "raca",
+    sexo: "sexo",
+    porte: "tamanho",
+    pesoAtual: "pesoAtual",
+    tamanhoDoPelo: "tamanhoDoPelo",
+    idade: "idade",
+    tranquilidade: "tranquilidade",
+    observacoes: "observacoes"
+};
+
+// Campos obrigatórios (id do formulário -> rótulo para a mensagem)
+const OBRIGATORIOS_CLIENTE = {
+    nome: "Nome completo", cpfCnpj: "CPF", telefone: "Telefone", email: "E-mail",
+    endereco: "Endereço", numero: "Número", bairro: "Bairro",
+    cidade: "Cidade", estado: "Estado", cep: "CEP"
+};
+
+const OBRIGATORIOS_PET = {
+    nomePet: "Nome do pet", tipoPet: "Espécie", raca: "Raça", sexo: "Sexo",
+    porte: "Tamanho", pesoAtual: "Peso atual", tamanhoDoPelo: "Tamanho do pelo",
+    idade: "Idade", tranquilidade: "Tranquilidade"
+};
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+// Lê o valor de um campo (retorna "" se o campo não existir no HTML)
+const val = id => (document.getElementById(id)?.value ?? "").trim();
+
+// Preenche um campo (ignora se não existir no HTML)
+function setVal(id, valor) {
+    const el = document.getElementById(id);
+    if (el) el.value = valor ?? "";
+}
+
+// Só considera os campos que existem no HTML
+const existentes = ids => ids.filter(id => document.getElementById(id));
+
+function paraApi(obj, mapa) {
+    const saida = {};
+    for (const [local, remoto] of Object.entries(mapa)) {
+        const v = obj[local];
+        if (v !== undefined && v !== "" && v !== null) saida[remoto] = v;
+    }
+    return saida;
+}
+
+function daApi(obj, mapa) {
+    const saida = { id: obj.id, createdAt: obj.createdAt };
+    for (const [local, remoto] of Object.entries(mapa)) {
+        saida[local] = obj[remoto] ?? "";
+    }
+    return saida;
+}
+
+function validar(obj, obrigatorios) {
+    const faltando = Object.entries(obrigatorios)
+        .filter(([id]) => obj[id] === "" || obj[id] === undefined || Number.isNaN(obj[id]))
+        .map(([, rotulo]) => rotulo);
+
+    if (faltando.length) {
+        alert("Preencha os campos obrigatórios:\n- " + faltando.join("\n- "));
+        return false;
+    }
+    return true;
+}
+
+async function api(caminho, opcoes = {}) {
+    const resposta = await fetch(API_URL + caminho, {
+        headers: { "Content-Type": "application/json" },
+        ...opcoes
     });
-});
 
-// CAMPO OUTROS - TIPO PET
+    let dados = null;
+    if (resposta.status !== 204) {
+        const texto = await resposta.text();
+        if (texto) {
+            try { dados = JSON.parse(texto); } catch { dados = texto; }
+        }
+    }
+
+    if (!resposta.ok) {
+        const msg = (dados && (dados.message || dados.erro || dados.error)) || `Erro ${resposta.status}`;
+        throw new Error(msg);
+    }
+    return dados;
+}
+
+function extrairLista(dados) {
+    if (Array.isArray(dados)) return dados;
+    return dados?.data ?? dados?.items ?? dados?.results ?? [];
+}
+
+function extrairItem(dados) {
+    return dados?.data ?? dados;
+}
+
+function esc(valor) {
+    const div = document.createElement("div");
+    div.textContent = valor ?? "";
+    return div.innerHTML;
+}
+
+function formatarData(valor) {
+    return valor ? new Date(valor).toLocaleDateString("pt-BR") : "";
+}
+
+// =====================================================
+// ELEMENTOS
+// =====================================================
+
+const formClientePet = document.getElementById("formClientePet");
+const buscaCliente = document.getElementById("buscaCliente");
+const listaClientes = document.getElementById("listaClientes");
+const listaPets = document.getElementById("listaPets");
+const tabelaClientes = document.getElementById("tabelaClientes");
+const tabelaPets = document.getElementById("tabelaPets");
+const campoBusca = document.getElementById("campoBusca");
 
 const tipoPet = document.getElementById("tipoPet");
 const campoTipoOutro = document.getElementById("campoTipoOutro");
 const tipoOutro = document.getElementById("tipoOutro");
+
+const btnNovo = document.getElementById("btnNovo");
+const btnBuscarCliente = document.getElementById("btnBuscarCliente");
+const btnPesquisar = document.getElementById("btnPesquisar");
+const btnSalvar = document.getElementById("btnSalvar");
+const btnEditar = document.getElementById("btnEditar");
+const btnSalvarAlteracoes = document.getElementById("btnSalvarAlteracoes");
+const btnNovoPet = document.getElementById("btnNovoPet");
+const btnExcluir = document.getElementById("btnExcluir");
+
+const idClienteEl = document.getElementById("idCliente");
+const idPetEl = document.getElementById("idPet");
+
+let clientesEncontrados = [];
+let petsDoCliente = [];
+
+btnNovoPet.disabled = true;
+
+// =====================================================
+// MAIÚSCULAS (e-mail fica em minúsculas)
+// =====================================================
+
+document.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(function(campo) {
+    campo.addEventListener("input", function() {
+        this.value = this.id === "email" ? this.value.toLowerCase() : this.value.toUpperCase();
+    });
+});
+
+// =====================================================
+// BLOQUEIO / LIBERAÇÃO DE CAMPOS
+// =====================================================
+
+const camposPet = existentes([...Object.keys(MAP_PET), "tipoOutro"]);
+const camposCliente = existentes(Object.keys(MAP_CLIENTE));
+
+const setDisabled = (ids, valor) =>
+    ids.forEach(id => { document.getElementById(id).disabled = valor; });
+
+const bloquearCamposPet = () => setDisabled(camposPet, true);
+const liberarCamposPet = () => setDisabled(camposPet, false);
+const bloquearCamposCliente = () => setDisabled(camposCliente, true);
+const liberarCamposCliente = () => setDisabled(camposCliente, false);
+
+// =====================================================
+// LEITURA DO FORMULÁRIO
+// =====================================================
+
+function lerCliente() {
+    const c = {};
+    Object.keys(MAP_CLIENTE).forEach(id => { c[id] = val(id); });
+    return c;
+}
+
+function lerPet() {
+    const p = {};
+    Object.keys(MAP_PET).forEach(id => { p[id] = val(id); });
+
+    // "outros": a espécie é o texto digitado
+    if (p.tipoPet === "outros") p.tipoPet = val("tipoOutro");
+
+    p.pesoAtual = p.pesoAtual === "" ? "" : Number(p.pesoAtual.replace(",", "."));
+    p.idade = p.idade === "" ? "" : parseInt(p.idade, 10);
+    return p;
+}
+
+function preencherPet(pet) {
+    Object.keys(MAP_PET).forEach(id => setVal(id, pet[id]));
+
+    // Se a espécie não existe na lista, vira "outros" + texto
+    const select = document.getElementById("tipoPet");
+    const especie = String(pet.tipoPet ?? "");
+    const existeNaLista = [...select.options].some(o => o.value.toUpperCase() === especie.toUpperCase());
+
+    if (especie && !existeNaLista) {
+        select.value = "outros";
+        setVal("tipoOutro", especie);
+        campoTipoOutro.hidden = false;
+    } else {
+        if (especie) {
+            const opt = [...select.options].find(o => o.value.toUpperCase() === especie.toUpperCase());
+            select.value = opt.value;
+        }
+        setVal("tipoOutro", "");
+        campoTipoOutro.hidden = true;
+    }
+}
+
+function limparPet() {
+    idPetEl.value = "";
+    camposPet.forEach(id => { document.getElementById(id).value = ""; });
+    campoTipoOutro.hidden = true;
+}
+
+// =====================================================
+// CAMPO OUTROS - TIPO PET
+// =====================================================
 
 tipoPet.addEventListener("change", function() {
     if (tipoPet.value === "outros") {
@@ -22,44 +252,39 @@ tipoPet.addEventListener("change", function() {
     }
 });
 
-
-// BOTÃO NOVO - LIMPA A TELA
-
-const btnNovo = document.getElementById("btnNovo");
-const formClientePet = document.getElementById("formClientePet");
-const buscaCliente = document.getElementById("buscaCliente");
-const listaPets = document.getElementById("listaPets");
-const listaClientes = document.getElementById("listaClientes");
-const nome = document.getElementById("nome");
+// =====================================================
+// BOTÃO NOVO
+// =====================================================
 
 btnNovo.addEventListener("click", function() {
     btnSalvar.disabled = false;
+    btnSalvarAlteracoes.disabled = true;
+    btnNovoPet.disabled = true;
     formClientePet.reset();
 
     liberarCamposCliente();
     liberarCamposPet();
-   
-    document.getElementById("idCliente").value = "";
-    document.getElementById("idPet").value = "";
+
+    idClienteEl.value = "";
+    idPetEl.value = "";
     buscaCliente.hidden = true;
     listaClientes.hidden = true;
     listaPets.hidden = true;
     campoTipoOutro.hidden = true;
     tipoOutro.value = "";
-    nome.focus();
+    document.getElementById("nome").focus();
 });
 
-
+// =====================================================
 // BOTÃO BUSCAR CLIENTE
-
-const btnBuscarCliente = document.getElementById("btnBuscarCliente");
-const campoBusca = document.getElementById("campoBusca");
+// =====================================================
 
 btnBuscarCliente.addEventListener("click", function() {
     btnSalvar.disabled = true;
+    btnNovoPet.disabled = true;
     formClientePet.reset();
-    document.getElementById("idCliente").value = "";
-    document.getElementById("idPet").value = "";
+    idClienteEl.value = "";
+    idPetEl.value = "";
     listaPets.hidden = true;
     listaClientes.hidden = true;
     campoTipoOutro.hidden = true;
@@ -69,280 +294,203 @@ btnBuscarCliente.addEventListener("click", function() {
     campoBusca.focus();
 });
 
-
-
-// PESQUISAR CLIENTE
-
-const btnPesquisar = document.getElementById("btnPesquisar");
-const tabelaClientes = document.getElementById("tabelaClientes");
+// =====================================================
+// PESQUISAR CLIENTE   GET /customers?search=
+// =====================================================
 
 btnPesquisar.addEventListener("click", async function() {
     const textoBusca = campoBusca.value.trim();
 
     if (textoBusca === "") {
-        alert("Digite o nome, telefone ou CPF/CNPJ do cliente.");
+        alert("Digite o nome, telefone, e-mail ou CPF do cliente.");
         campoBusca.focus();
         return;
     }
 
     try {
-        const resposta = await fetch(
-            `http://localhost:3000/clientes?busca=${encodeURIComponent(textoBusca)}`
-        );
+        const dados = await api(`/customers?search=${encodeURIComponent(textoBusca)}&page=1&limit=50`);
+        clientesEncontrados = extrairLista(dados).map(c => daApi(c, MAP_CLIENTE));
 
-        const clientes = await resposta.json();
-
-        if (!resposta.ok) {
-            alert(clientes.erro);
-            return;
-        }
-
-        tabelaClientes.innerHTML = "";
-
-        if (clientes.length === 0) {
-            tabelaClientes.innerHTML = `
-                <tr>
-                    <td colspan="5">Nenhum cliente encontrado.</td>
-                </tr>
-            `;
+        if (clientesEncontrados.length === 0) {
+            tabelaClientes.innerHTML = `<tr><td colspan="5">Nenhum cliente encontrado.</td></tr>`;
         } else {
-            clientes.forEach(cliente => {
-                tabelaClientes.innerHTML += `
-                    <tr>
-                        <td>${cliente.nome}</td>
-                        <td>${cliente.telefone || ""}</td>
-                        <td>${cliente.cpfCnpj || ""}</td>
-                        <td>${cliente.dataRegistro || ""}</td>
-                        <td>
-                            <button type="button"
-                                    class="btnSelecionarCliente"
-                                    data-id="${cliente.id}">
-                                Selecionar
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        listaClientes.hidden = false;
-
-
-        // SELECIONAR CLIENTE
-
-        document.querySelectorAll(".btnSelecionarCliente").forEach(function(botao) {
-            botao.addEventListener("click", async function() {
-                const id = this.dataset.id;
-                const cliente = clientes.find(cliente => cliente.id == id);
-
-                document.getElementById("idCliente").value = cliente.id;
-                btnNovoPet.disabled = false;
-                document.getElementById("nome").value = cliente.nome;
-                document.getElementById("email").value = cliente.email || "";
-                document.getElementById("telefone").value = cliente.telefone || "";
-                document.getElementById("endereco").value = cliente.endereco || "";
-                document.getElementById("cpfCnpj").value = cliente.cpfCnpj || "";
-                document.getElementById("dataRegistro").value = cliente.dataRegistro || "";
-
-                bloquearCamposCliente();
-                bloquearCamposPet();
-
-                buscaCliente.hidden = true;
-                listaClientes.hidden = true;
-
-
-// PETS DO CLIENTE SELECIONADO
-
-listaPets.hidden = false;
-
-const tabelaPets = document.getElementById("tabelaPets");
-
-try {
-    const respostaPets = await fetch(`http://localhost:3000/pets/${id}`);
-    const pets = await respostaPets.json();
-
-    tabelaPets.innerHTML = "";
-
-    if (pets.length === 0) {
-        tabelaPets.innerHTML = `
-            <tr>
-                <td colspan="5">Nenhum pet cadastrado.</td>
-            </tr>
-        `;
-    } else {
-        pets.forEach(pet => {
-            tabelaPets.innerHTML += `
+            tabelaClientes.innerHTML = clientesEncontrados.map(c => `
                 <tr>
-                    <td>${pet.nomePet}</td>
-                    <td>${pet.raca || ""}</td>
-                    <td>${pet.sexo || ""}</td>
-                    <td>${pet.porte || ""}</td>
+                    <td>${esc(c.nome)}</td>
+                    <td>${esc(c.telefone)}</td>
+                    <td>${esc(c.cpfCnpj)}</td>
+                    <td>${esc(formatarData(c.createdAt))}</td>
                     <td>
-                        <button type="button"
-                                class="btnSelecionarPet"
-                                data-id="${pet.id}">
+                        <button type="button" class="btnSelecionarCliente" data-id="${esc(c.id)}">
                             Selecionar
                         </button>
                     </td>
                 </tr>
-            `;
-        });
+            `).join("");
+        }
+
+        listaClientes.hidden = false;
+    } catch (erro) {
+        console.error("Erro ao buscar clientes:", erro);
+        alert("Erro ao buscar clientes: " + erro.message);
     }
+});
+
+campoBusca.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        btnPesquisar.click();
+    }
+});
+
+// =====================================================
+// SELECIONAR CLIENTE
+// =====================================================
+
+tabelaClientes.addEventListener("click", async function(event) {
+    const botao = event.target.closest(".btnSelecionarCliente");
+    if (!botao) return;
+
+    const cliente = clientesEncontrados.find(c => String(c.id) === botao.dataset.id);
+    if (!cliente) return;
+
+    idClienteEl.value = cliente.id;
+    idPetEl.value = "";
+    limparPet();
+    btnNovoPet.disabled = false;
+    btnSalvar.disabled = true;
+
+    Object.keys(MAP_CLIENTE).forEach(id => setVal(id, cliente[id]));
+    setVal("dataRegistro", cliente.createdAt ? String(cliente.createdAt).slice(0, 10) : "");
+
+    bloquearCamposCliente();
+    bloquearCamposPet();
+
+    buscaCliente.hidden = true;
+    listaClientes.hidden = true;
+
+    await carregarPets(cliente.id);
+});
+
+// =====================================================
+// PETS DO CLIENTE   GET /pets?customerId=
+// =====================================================
+
+async function carregarPets(idCliente) {
+    listaPets.hidden = false;
+
+    try {
+        // OBS: o Swagger não documenta filtro por cliente em /pets.
+        // Enviamos ?customerId= e filtramos também no front.
+        const dados = await api(`/pets?customerId=${encodeURIComponent(idCliente)}&page=1&limit=100`);
+
+        petsDoCliente = extrairLista(dados)
+            .filter(p => !p.customerId || String(p.customerId) === String(idCliente))
+            .map(p => daApi(p, MAP_PET));
+
+        if (petsDoCliente.length === 0) {
+            tabelaPets.innerHTML = `<tr><td colspan="5">Nenhum pet cadastrado.</td></tr>`;
+            return;
+        }
+
+        tabelaPets.innerHTML = petsDoCliente.map(p => `
+            <tr>
+                <td>${esc(p.nomePet)}</td>
+                <td>${esc(p.raca)}</td>
+                <td>${esc(p.sexo)}</td>
+                <td>${esc(p.porte)}</td>
+                <td>
+                    <button type="button" class="btnSelecionarPet" data-id="${esc(p.id)}">
+                        Selecionar
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+    } catch (erro) {
+        console.error("Erro ao carregar pets:", erro);
+        tabelaPets.innerHTML = `<tr><td colspan="5">Erro ao carregar os pets.</td></tr>`;
+    }
+}
 
 // SELECIONAR PET
 
-     document.querySelectorAll(".btnSelecionarPet").forEach(function(botaoPet) {
-        botaoPet.addEventListener("click", function() {
-            const idPetSelecionado = this.dataset.id;
-            const pet = pets.find(pet => pet.id == idPetSelecionado);
+tabelaPets.addEventListener("click", function(event) {
+    const botao = event.target.closest(".btnSelecionarPet");
+    if (!botao) return;
 
-                 if (!pet) {
-                    alert("Pet não encontrado.");
-                    return;
-                }
-
-                document.getElementById("idPet").value = pet.id;
-                document.getElementById("nomePet").value = pet.nomePet || "";
-                document.getElementById("sexo").value = pet.sexo || "";
-                document.getElementById("tipoPet").value = pet.tipoPet || "";
-                document.getElementById("raca").value = pet.raca || "";
-                document.getElementById("porte").value = pet.porte || "";
-                document.getElementById("tipoOutro").value = pet.tipoOutro || "";
-                document.getElementById("caracteristicasPet").value = pet.caracteristicasPet || "";
-                document.getElementById("detalhesServico").value = pet.detalhesServico || "";
-                document.getElementById("observacoes").value = pet.observacoes || "";
-
-                if (pet.tipoPet === "outros") {
-                    campoTipoOutro.hidden = false;
-                    } else {
-                    campoTipoOutro.hidden = true;
-                    }
-                bloquearCamposPet();
-                });
-            });
-
-    } catch (erro) {
-        console.error("Erro ao carregar pets:", erro);
-
-        tabelaPets.innerHTML = `
-            <tr>
-                <td colspan="5">Erro ao carregar os pets.</td>
-            </tr>
-        `;
+    const pet = petsDoCliente.find(p => String(p.id) === botao.dataset.id);
+    if (!pet) {
+        alert("Pet não encontrado.");
+        return;
     }
-    });
+
+    idPetEl.value = pet.id;
+    preencherPet(pet);
+    bloquearCamposPet();
 });
 
-    } catch (erro) {
-        console.error("Erro ao buscar clientes:", erro);
-        alert("Erro ao conectar com o servidor.");
-    }
-});
-// SALVAR CLIENTE OU PET
-
-const btnSalvar = document.getElementById("btnSalvar");
+// =====================================================
+// SALVAR CLIENTE OU PET   POST /customers  |  POST /pets
+// =====================================================
 
 btnSalvar.addEventListener("click", async function() {
-    const idCliente = document.getElementById("idCliente").value;
+    const idCliente = idClienteEl.value;
 
     try {
-
         // CADASTRAR CLIENTE
-
         if (!idCliente) {
-            const cliente = {
-                nome: document.getElementById("nome").value.trim(),
-                email: document.getElementById("email").value.trim(),
-                telefone: document.getElementById("telefone").value.trim(),
-                endereco: document.getElementById("endereco").value.trim(),
-                cpfCnpj: document.getElementById("cpfCnpj").value.trim(),
-                dataRegistro: document.getElementById("dataRegistro").value
-            };
+            const cliente = lerCliente();
+            if (!validar(cliente, OBRIGATORIOS_CLIENTE)) return;
 
-            if (!cliente.nome || !cliente.email) {
-                alert("Nome e e-mail são obrigatórios.");
-                return;
-            }
-
-            const resposta = await fetch("http://localhost:3000/clientes", {
+            const dados = await api("/customers", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(cliente)
+                body: JSON.stringify(paraApi(cliente, MAP_CLIENTE))
             });
 
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                alert(dados.erro);
-                return;
-            }
-
-            document.getElementById("idCliente").value = dados.id;
+            idClienteEl.value = extrairItem(dados).id;
+            btnNovoPet.disabled = false;
 
             alert("Cliente cadastrado com sucesso!");
             return;
         }
 
-
         // CADASTRAR PET
+        const pet = lerPet();
+        if (!validar(pet, OBRIGATORIOS_PET)) return;
 
-        const pet = {
-            idCliente: idCliente,
-            nomePet: document.getElementById("nomePet").value.trim(),
-            sexo: document.getElementById("sexo").value,
-            tipoPet: document.getElementById("tipoPet").value,
-            raca: document.getElementById("raca").value.trim(),
-            porte: document.getElementById("porte").value,
-            tipoOutro: document.getElementById("tipoOutro").value.trim(),
-            caracteristicasPet: document.getElementById("caracteristicasPet").value.trim(),
-            detalhesServico: document.getElementById("detalhesServico").value.trim(),
-            observacoes: document.getElementById("observacoes").value.trim()
-        };
+        const corpo = paraApi(pet, MAP_PET);
+        corpo.customerId = idCliente;
 
-        if (!pet.nomePet) {
-            alert("Nome do pet é obrigatório.");
-            return;
-        }
-
-        const resposta = await fetch("http://localhost:3000/pets", {
+        const dados = await api("/pets", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(pet)
+            body: JSON.stringify(corpo)
         });
 
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-            alert(dados.erro);
-            return;
-        }
-
-        document.getElementById("idPet").value = dados.id;
+        idPetEl.value = extrairItem(dados).id;
 
         alert("Pet cadastrado com sucesso!");
 
+        bloquearCamposPet();
+        await carregarPets(idCliente);
+
     } catch (erro) {
-    console.error("ERRO REAL:", erro);
-    alert("Erro: " + erro.message);
+        console.error("Erro ao salvar:", erro);
+        alert("Erro: " + erro.message);
     }
 });
-// EDITAR CLIENTE OU PET
+
+// =====================================================
+// EDITAR
+// =====================================================
 
 btnEditar.addEventListener("click", function() {
-    const idPet = document.getElementById("idPet").value;
-    const idCliente = document.getElementById("idCliente").value;
-
-    if (idPet) {
+    if (idPetEl.value) {
         liberarCamposPet();
         btnSalvarAlteracoes.disabled = false;
         return;
     }
 
-    if (idCliente) {
+    if (idClienteEl.value) {
         liberarCamposCliente();
         btnSalvarAlteracoes.disabled = false;
         return;
@@ -351,282 +499,114 @@ btnEditar.addEventListener("click", function() {
     alert("Selecione um cliente ou pet para editar.");
 });
 
-// SALVAR ALTERAÇÕES
+// =====================================================
+// SALVAR ALTERAÇÕES   PUT /pets/{id}  |  PUT /customers/{id}
+// =====================================================
 
 btnSalvarAlteracoes.addEventListener("click", async function() {
-    const idPet = document.getElementById("idPet").value;
-    const idCliente = document.getElementById("idCliente").value;
+    const idPet = idPetEl.value;
+    const idCliente = idClienteEl.value;
 
-    if (idPet) {
+    try {
+        if (idPet) {
+            const pet = lerPet();
+            if (!validar(pet, OBRIGATORIOS_PET)) return;
 
-        const pet = {
-            nomePet: document.getElementById("nomePet").value.trim(),
-            sexo: document.getElementById("sexo").value,
-            tipoPet: document.getElementById("tipoPet").value,
-            raca: document.getElementById("raca").value.trim(),
-            porte: document.getElementById("porte").value,
-            tipoOutro: document.getElementById("tipoOutro").value.trim(),
-            caracteristicasPet: document.getElementById("caracteristicasPet").value.trim(),
-            detalhesServico: document.getElementById("detalhesServico").value.trim(),
-            observacoes: document.getElementById("observacoes").value.trim()
-        };
-
-        if (!pet.nomePet) {
-            alert("Nome do pet é obrigatório.");
-            return;
-        }
-
-        try {
-            const resposta = await fetch(`http://localhost:3000/pets/${idPet}`, {
+            await api(`/pets/${idPet}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(pet)
+                body: JSON.stringify(paraApi(pet, MAP_PET))
             });
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                alert(dados.erro);
-                return;
-            }
 
             alert("Pet atualizado com sucesso!");
 
-            const botaoPet = document.querySelector(
-                `.btnSelecionarPet[data-id="${idPet}"]`
-            );
-
-            if (botaoPet) {
-                const linha = botaoPet.closest("tr");
-
-                linha.cells[0].textContent = pet.nomePet;
-                linha.cells[1].textContent = pet.raca;
-                linha.cells[2].textContent = pet.sexo;
-                linha.cells[3].textContent = pet.porte;
-            }
-
             bloquearCamposPet();
             btnSalvarAlteracoes.disabled = true;
-            return;
-
-        } catch (erro) {
-            console.error("Erro ao salvar alterações:", erro);
-            alert("Erro ao conectar com o servidor.");
-            return;
-        }
-    }
-
-    if (idCliente) {
-
-        const cliente = {
-            nome: document.getElementById("nome").value.trim(),
-            telefone: document.getElementById("telefone").value.trim(),
-            email: document.getElementById("email").value.trim(),
-            endereco: document.getElementById("endereco").value.trim(),
-            cpfCnpj: document.getElementById("cpfCnpj").value.trim(),
-            dataRegistro: document.getElementById("dataRegistro").value
-        };
-
-        if (!cliente.nome || !cliente.email) {
-            alert("Nome e e-mail são obrigatórios.");
+            await carregarPets(idCliente);
             return;
         }
 
-        try {
-            const resposta = await fetch(`http://localhost:3000/clientes/${idCliente}`, {
+        if (idCliente) {
+            const cliente = lerCliente();
+            if (!validar(cliente, OBRIGATORIOS_CLIENTE)) return;
+
+            await api(`/customers/${idCliente}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(cliente)
+                body: JSON.stringify(paraApi(cliente, MAP_CLIENTE))
             });
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                alert(dados.erro);
-                return;
-            }
 
             alert("Cliente atualizado com sucesso!");
 
             bloquearCamposCliente();
             btnSalvarAlteracoes.disabled = true;
-
-        } catch (erro) {
-            console.error("Erro ao salvar alterações:", erro);
-            alert("Erro ao conectar com o servidor.");
+            return;
         }
 
-        return;
-    }
+        alert("Selecione um cliente ou pet para editar.");
 
-    alert("Selecione um cliente ou pet para editar.");
+    } catch (erro) {
+        console.error("Erro ao salvar alterações:", erro);
+        alert("Erro: " + erro.message);
+    }
 });
 
+// =====================================================
 // BOTÃO NOVO PET
-
-const btnNovoPet = document.getElementById("btnNovoPet");
-btnNovoPet.disabled = true;
+// =====================================================
 
 btnNovoPet.addEventListener("click", function() {
-    document.getElementById("idPet").value = "";
-    document.getElementById("nomePet").value = "";
-    document.getElementById("sexo").value = "";
-    document.getElementById("tipoPet").value = "";
-    document.getElementById("raca").value = "";
-    document.getElementById("porte").value = "";
-    document.getElementById("tipoOutro").value = "";
-    document.getElementById("caracteristicasPet").value = "";
-    document.getElementById("detalhesServico").value = "";
-    document.getElementById("observacoes").value = "";
+    limparPet();
     liberarCamposPet();
-
-    campoTipoOutro.hidden = true;
-
+    btnSalvar.disabled = false;
+    btnSalvarAlteracoes.disabled = true;
     document.getElementById("nomePet").focus();
 });
 
-// CAMPOS DO PET - BLOQUEIO
-
-const camposPet = [
-    "nomePet",
-    "sexo",
-    "tipoPet",
-    "raca",
-    "porte",
-    "tipoOutro",
-    "caracteristicasPet",
-    "detalhesServico",
-    "observacoes"
-];
-
-function bloquearCamposPet() {
-    camposPet.forEach(id => {
-        document.getElementById(id).disabled = true;
-    });
-}
-
-function liberarCamposPet() {
-    camposPet.forEach(id => {
-        document.getElementById(id).disabled = false;
-    });
-}
-
-// CAMPOS DO CLIENTE - BLOQUEIO
-
-const camposCliente = [
-    "nome",
-    "telefone",
-    "email",
-    "endereco",
-    "cpfCnpj",
-    "dataRegistro"
-];
-
-function bloquearCamposCliente() {
-    camposCliente.forEach(id => {
-        document.getElementById(id).disabled = true;
-    });
-}
-
-function liberarCamposCliente() {
-    camposCliente.forEach(id => {
-        document.getElementById(id).disabled = false;
-    });
-}
-
-// EXCLUIR CLIENTE OU PET
-
-const btnExcluir = document.getElementById("btnExcluir");
+// =====================================================
+// EXCLUIR   DELETE (soft delete, retorna 204)
+// =====================================================
 
 btnExcluir.addEventListener("click", async function() {
-    const idPet = document.getElementById("idPet").value;
-    const idCliente = document.getElementById("idCliente").value;
+    const idPet = idPetEl.value;
+    const idCliente = idClienteEl.value;
 
     if (!idPet && !idCliente) {
         alert("Selecione um cliente ou pet para excluir.");
         return;
     }
 
-    if (idPet) {
-        if (!confirm("Deseja realmente excluir este pet?")) {
-            return;
-        }
+    try {
+        if (idPet) {
+            if (!confirm("Deseja realmente excluir este pet?")) return;
 
-        try {
-            const resposta = await fetch(`http://localhost:3000/pets/${idPet}`, {
-                method: "DELETE"
-            });
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                alert(dados.erro);
-                return;
-            }
+            await api(`/pets/${idPet}`, { method: "DELETE" });
 
             alert("Pet excluído com sucesso!");
 
-            const botaoPet = document.querySelector(
-                `.btnSelecionarPet[data-id="${idPet}"]`
-            );
-
-            if (botaoPet) {
-                botaoPet.closest("tr").remove();
-            }
-
-            document.getElementById("idPet").value = "";
+            limparPet();
             bloquearCamposPet();
             btnSalvarAlteracoes.disabled = true;
-
-        } catch (erro) {
-            console.error("Erro ao excluir pet:", erro);
-            alert("Erro ao conectar com o servidor.");
-        }
-
-        return;
-    }
-
-    if (idCliente) {
-        if (!confirm("Deseja realmente excluir este cliente?")) {
+            await carregarPets(idCliente);
             return;
         }
 
-        try {
-            const resposta = await fetch(`http://localhost:3000/clientes/${idCliente}`, {
-                method: "DELETE"
-            });
+        if (!confirm("Deseja realmente excluir este cliente?")) return;
 
-            const dados = await resposta.json();
+        await api(`/customers/${idCliente}`, { method: "DELETE" });
 
-            if (!resposta.ok) {
-                alert(dados.erro);
-                return;
-            }
+        alert("Cliente excluído com sucesso!");
 
-            alert("Cliente excluído com sucesso!");
+        idClienteEl.value = "";
+        idPetEl.value = "";
 
-            document.getElementById("idCliente").value = "";
-            document.getElementById("idPet").value = "";
+        formClientePet.reset();
+        bloquearCamposCliente();
+        bloquearCamposPet();
+        btnSalvarAlteracoes.disabled = true;
+        btnNovoPet.disabled = true;
+        listaPets.hidden = true;
 
-            formClientePet.reset();
-            bloquearCamposCliente();
-            bloquearCamposPet();
-            btnSalvarAlteracoes.disabled = true;
-            listaPets.hidden = true;
-
-        } catch (erro) {
-            console.error("Erro ao excluir cliente:", erro);
-            alert("Erro ao conectar com o servidor.");
-        }
+    } catch (erro) {
+        console.error("Erro ao excluir:", erro);
+        alert("Erro: " + erro.message);
     }
 });
-campoBusca.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        btnPesquisar.click();
-    }
-});
-            

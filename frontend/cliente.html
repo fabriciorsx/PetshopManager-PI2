@@ -21,7 +21,7 @@
 
             <div class="area-pesquisa">
                 <div class="campo">
-                    <label for="campoBusca">Nome, telefone ou CPF/CNPJ</label>
+                    <label for="campoBusca">Nome, telefone, e-mail ou CPF</label>
                     <input type="search" id="campoBusca" name="campoBusca"
                            placeholder="Digite para buscar...">
                 </div>
@@ -38,7 +38,7 @@
                         <tr>
                             <th>Nome</th>
                             <th>Telefone</th>
-                            <th>CPF/CNPJ</th>
+                            <th>CPF</th>
                             <th>Data do Registro</th>
                             <th>Ação</th>
                         </tr>
@@ -58,8 +58,8 @@
                 <h1>Cliente</h1>
 
                 <div class="campo campo-nome">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" placeholder="Nome do cliente">
+                    <label for="nome">Nome completo</label>
+                    <input type="text" id="nome" name="nome" placeholder="Nome completo do cliente">
                 </div>
 
                 <div class="campo campo-telefone">
@@ -74,17 +74,47 @@
 
                 <div class="campo campo-endereco">
                     <label for="endereco">Endereço</label>
-                    <input type="text" id="endereco" name="endereco" placeholder="Endereço">
+                    <input type="text" id="endereco" name="endereco" placeholder="Rua / Avenida">
+                </div>
+
+                <div class="campo campo-numero">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" name="numero" placeholder="Nº">
+                </div>
+
+                <div class="campo campo-complemento">
+                    <label for="complemento">Complemento</label>
+                    <input type="text" id="complemento" name="complemento" placeholder="Complemento (opcional)">
+                </div>
+
+                <div class="campo campo-bairro">
+                    <label for="bairro">Bairro</label>
+                    <input type="text" id="bairro" name="bairro" placeholder="Bairro">
+                </div>
+
+                <div class="campo campo-cidade">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" name="cidade" placeholder="Cidade">
+                </div>
+
+                <div class="campo campo-estado">
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" name="estado" placeholder="UF" maxlength="2">
+                </div>
+
+                <div class="campo campo-cep">
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" name="cep" placeholder="CEP" maxlength="9">
                 </div>
 
                 <div class="campo campo-cpf">
-                    <label for="cpfCnpj">CPF/CNPJ</label>
-                    <input type="text" id="cpfCnpj" name="cpfCnpj" placeholder="CPF ou CNPJ">
+                    <label for="cpfCnpj">CPF</label>
+                    <input type="text" id="cpfCnpj" name="cpfCnpj" placeholder="CPF">
                 </div>
 
                 <div class="campo campo-data">
                     <label for="dataRegistro">Data do Registro</label>
-                    <input type="date" id="dataRegistro" name="dataRegistro">
+                    <input type="date" id="dataRegistro" name="dataRegistro" readonly>
                 </div>
             </section>
 
@@ -157,19 +187,39 @@
                            placeholder="Digite o tipo do pet">
                 </div>
 
+                <div class="campo campo-peso">
+                    <label for="pesoAtual">Peso atual (kg)</label>
+                    <input type="number" id="pesoAtual" name="pesoAtual"
+                           min="0" step="0.01" placeholder="Peso em kg">
+                </div>
+
+                <div class="campo campo-idade">
+                    <label for="idade">Idade (anos)</label>
+                    <input type="number" id="idade" name="idade"
+                           min="0" step="1" placeholder="Idade">
+                </div>
+
+                <div class="campo campo-pelo">
+                    <label for="tamanhoDoPelo">Tamanho do pelo</label>
+                    <select id="tamanhoDoPelo" name="tamanhoDoPelo">
+                        <option value="">Selecione</option>
+                        <option value="curto">Curto</option>
+                        <option value="medio">Médio</option>
+                        <option value="longo">Longo</option>
+                    </select>
+                </div>
+
+                <div class="campo campo-tranquilidade">
+                    <label for="tranquilidade">Tranquilidade</label>
+                    <select id="tranquilidade" name="tranquilidade">
+                        <option value="">Selecione</option>
+                        <option value="calmo">Calmo</option>
+                        <option value="agitado">Agitado</option>
+                        <option value="agressivo">Agressivo</option>
+                    </select>
+                </div>
+
                 <!-- QUADROS DO PET -->
-                <div class="quadro quadro-caracteristicas">
-                    <label for="caracteristicasPet">Características do Pet</label>
-                    <textarea id="caracteristicasPet" name="caracteristicasPet"
-                              rows="5" placeholder="Descreva as características do pet"></textarea>
-                </div>
-
-                <div class="quadro quadro-servico">
-                    <label for="detalhesServico">Detalhes do Serviço</label>
-                    <textarea id="detalhesServico" name="detalhesServico"
-                              rows="5" placeholder="Descreva os detalhes do serviço"></textarea>
-                </div>
-
                 <div class="quadro quadro-observacoes">
                     <label for="observacoes">Observações</label>
                     <textarea id="observacoes" name="observacoes"
@@ -179,14 +229,11 @@
 
             <!-- AÇÕES DO FORMULÁRIO -->
             <div id="acoesFormulario">
-
-           <button type="button" id="btnNovoPet" disabled>Novo Pet</button>
-           
-            <button type="button" 
-            id="btnSalvar">Cadastrar</button>
-            <button type="button" id="btnEditar">Editar</button>
-            <button type="button" id="btnSalvarAlteracoes" disabled>Salvar alterações</button>
-            <button type="button" id="btnExcluir">Excluir</button>
+                <button type="button" id="btnNovoPet" disabled>Novo Pet</button>
+                <button type="button" id="btnSalvar">Cadastrar</button>
+                <button type="button" id="btnEditar">Editar</button>
+                <button type="button" id="btnSalvarAlteracoes" disabled>Salvar alterações</button>
+                <button type="button" id="btnExcluir">Excluir</button>
             </div>
 
         </form>

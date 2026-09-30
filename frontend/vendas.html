@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendas</title>
     <link rel="stylesheet" href="vendas.css">
 </head>
+
 <body>
     <main>
 
@@ -14,6 +16,25 @@
             <button type="button" id="btnNovaVenda">Nova Venda</button>
             <button type="button" id="btnBuscarVenda">Buscar Venda</button>
         </nav>
+
+        <!-- RESULTADO DA BUSCA DE VENDAS -->
+        <section id="listaVendas" hidden>
+            <h3>Vendas encontradas</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaVendas"></tbody>
+            </table>
+        </section>
 
         <!-- FORMULÁRIO DA VENDA -->
         <form id="formVenda">
@@ -38,8 +59,7 @@
 
                     <div class="campo">
                         <label for="numeroVenda">Número da Venda</label>
-                        <input type="text" id="numeroVenda" name="numeroVenda"
-                               placeholder="Número da venda" readonly>
+                        <input type="text" id="numeroVenda" name="numeroVenda" placeholder="Número da venda" readonly>
                     </div>
 
                     <div class="campo">
@@ -55,13 +75,29 @@
 
                 <!-- BUSCA DE CLIENTE -->
                 <div class="subdivisao" id="buscaClienteVenda">
-                <h3>Busca de Cliente</h3>
+
+                    <h3>Busca de Cliente</h3>
 
                     <div class="area-pesquisa">
+                        <div id="listaClientesVenda" hidden>
+                            <h3>Clientes encontrados</h3>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Telefone</th>
+                                        <th>CPF</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaClientesVenda"></tbody>
+                            </table>
+                        </div>
                         <div class="campo">
                             <label for="campoBuscaCliente">Nome, telefone ou CPF/CNPJ</label>
                             <input type="search" id="campoBuscaCliente" name="campoBuscaCliente"
-                                   placeholder="Digite para buscar o cliente...">
+                                placeholder="Digite para buscar o cliente...">
                         </div>
                         <button type="button" id="btnPesquisarCliente">Pesquisar</button>
                     </div>
@@ -72,7 +108,7 @@
                     <div class="campo">
                         <label for="clienteSelecionado">Cliente</label>
                         <input type="text" id="clienteSelecionado" name="clienteSelecionado"
-                               placeholder="Cliente selecionado" readonly>
+                            placeholder="Cliente selecionado" readonly>
                     </div>
 
                     <div class="campo">
@@ -136,32 +172,27 @@
 
                 <div class="campo">
                     <label for="valorBruto">Valor Bruto da Venda</label>
-                    <input type="number" id="valorBruto" name="valorBruto"
-                           step="0.01" min="0" readonly>
+                    <input type="number" id="valorBruto" name="valorBruto" step="0.01" min="0" readonly>
                 </div>
 
                 <div class="campo">
                     <label for="descontoVenda">Desconto ao Cliente</label>
-                    <input type="number" id="descontoVenda" name="descontoVenda"
-                           step="0.01" min="0" value="0">
+                    <input type="number" id="descontoVenda" name="descontoVenda" step="0.01" min="0" value="0">
                 </div>
 
                 <div class="campo">
                     <label for="valorVenda">Valor da Venda</label>
-                    <input type="number" id="valorVenda" name="valorVenda"
-                           step="0.01" min="0" readonly>
+                    <input type="number" id="valorVenda" name="valorVenda" step="0.01" min="0" readonly>
                 </div>
 
                 <div class="campo">
                     <label for="taxaPagamento">Taxa da Forma de Pagamento</label>
-                    <input type="number" id="taxaPagamento" name="taxaPagamento"
-                           step="0.01" min="0" value="0">
+                    <input type="number" id="taxaPagamento" name="taxaPagamento" step="0.01" min="0" value="0">
                 </div>
 
                 <div class="campo">
                     <label for="valorLiquido">Valor Líquido Recebido</label>
-                    <input type="number" id="valorLiquido" name="valorLiquido"
-                           step="0.01" min="0" readonly>
+                    <input type="number" id="valorLiquido" name="valorLiquido" step="0.01" min="0" readonly>
                 </div>
             </section>
 
@@ -173,30 +204,27 @@
                     <label for="formaPagamento">Forma de Pagamento</label>
                     <select id="formaPagamento" name="formaPagamento">
                         <option value="">Selecione</option>
-                        <option value="dinheiro">Dinheiro</option>
-                        <option value="pix">Pix</option>
-                        <option value="debito">Cartão de Débito</option>
-                        <option value="credito">Cartão de Crédito</option>
-                        <option value="outro">Outro</option>
+                        <option value="DINHEIRO">Dinheiro</option>
+                        <option value="PIX">Pix</option>
+                        <option value="CARTAO_DEBITO">Cartão de Débito</option>
+                        <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+                        <option value="OUTRO">Outro</option>
                     </select>
                 </div>
 
                 <div class="campo">
                     <label for="valorRecebido">Valor Recebido</label>
-                    <input type="number" id="valorRecebido" name="valorRecebido"
-                           step="0.01" min="0">
+                    <input type="number" id="valorRecebido" name="valorRecebido" step="0.01" min="0">
                 </div>
 
                 <div class="campo">
                     <label for="troco">Troco</label>
-                    <input type="number" id="troco" name="troco"
-                           step="0.01" min="0" readonly>
+                    <input type="number" id="troco" name="troco" step="0.01" min="0" readonly>
                 </div>
 
                 <div class="campo">
                     <label for="observacoes">Observações</label>
-                    <input type="text" id="observacoes" name="observacoes"
-                           placeholder="Observações sobre a venda">
+                    <input type="text" id="observacoes" name="observacoes" placeholder="Observações sobre a venda">
                 </div>
             </section>
 
@@ -211,4 +239,5 @@
 
     <script src="vendas.js"></script>
 </body>
+
 </html>

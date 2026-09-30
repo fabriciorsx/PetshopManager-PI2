@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produtos e Serviços</title>
+    <link rel="stylesheet" href="cadastroItens.css">
+</head>
+
+<body>
+    <main>
+
+        <!-- AÇÕES PRINCIPAIS -->
+        <nav aria-label="Ações principais">
+            <button type="button" id="btnNovoItem">Novo Cadastro</button>
+            <button type="button" id="btnBuscarItem">Buscar Cadastro</button>
+        </nav>
+
+        <!-- MENSAGENS -->
+        <p id="mensagem" role="status" hidden></p>
+
+        <!-- BUSCA -->
+        <section id="buscaItens" hidden>
+            <h3>Busca de Produtos e Serviços</h3>
+
+            <div class="area-pesquisa">
+                <div class="campo">
+                    <label for="filtroTipo">Tipo</label>
+                    <select id="filtroTipo">
+                        <option value="todos">Produtos e serviços</option>
+                        <option value="produto">Somente produtos</option>
+                        <option value="servico">Somente serviços</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="campoBuscaItem">Nome ou SKU</label>
+                    <input type="search" id="campoBuscaItem" placeholder="Digite para buscar...">
+                </div>
+                <button type="button" id="btnPesquisarItem">Pesquisar</button>
+            </div>
+
+            <div id="listaItens" hidden>
+                <h3>Cadastros encontrados</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Nome</th>
+                            <th>SKU / Duração</th>
+                            <th>Preço</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaItens"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FORMULÁRIO -->
+        <form id="formItem" novalidate>
+            <input type="hidden" id="idItem" name="idItem">
+
+            <!-- TIPO DE CADASTRO -->
+            <section id="dadosTipo">
+                <h1>Cadastro de Produtos e Serviços</h1>
+                <h2>Tipo de Cadastro</h2>
+
+                <div id="linhaDadosTipo">
+                    <div class="tipoVenda">
+                        <label>
+                            <input type="radio" name="tipoItem" value="produto" checked>
+                            Produto
+                        </label>
+                        <label>
+                            <input type="radio" name="tipoItem" value="servico">
+                            Serviço
+                        </label>
+                    </div>
+
+                    <div class="campo">
+                        <label for="statusItem">Status</label>
+                        <select id="statusItem" name="statusItem">
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DADOS GERAIS -->
+            <section id="dadosGerais">
+                <h2>Dados Gerais</h2>
+
+                <div class="dadosGrupo">
+                    <div class="campo">
+                        <label for="nomeItem">Nome</label>
+                        <input type="text" id="nomeItem" name="nomeItem" maxlength="120" placeholder="Nome do produto ou serviço" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="precoItem">Preço Atual</label>
+                        <input type="number" id="precoItem" name="precoItem" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label for="descricaoItem">Descrição</label>
+                    <input type="text" id="descricaoItem" name="descricaoItem" placeholder="Descrição (opcional)">
+                </div>
+
+                <div class="campo" id="campoMotivoPreco" hidden>
+                    <label for="motivoPreco">Motivo da alteração de preço</label>
+                    <input type="text" id="motivoPreco" name="motivoPreco" placeholder="Informe caso o preço seja alterado">
+                </div>
+            </section>
+
+            <!-- DADOS DO PRODUTO -->
+            <section id="dadosProduto" class="subdivisao">
+                <h2>Dados do Produto</h2>
+
+                <div class="dadosGrupo">
+                    <div class="campo">
+                        <label for="categoriaItem">Categoria</label>
+                        <select id="categoriaItem" name="categoriaItem">
+                            <option value="">Selecione a categoria</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="btnNovaCategoria">+ Nova Categoria</button>
+
+                    <div class="campo">
+                        <label for="skuItem">SKU</label>
+                        <input type="text" id="skuItem" name="skuItem" maxlength="60" placeholder="Código único do produto">
+                    </div>
+                </div>
+
+                <div class="dadosGrupo">
+                    <div class="campo">
+                        <label for="estoqueAtual">Estoque Atual</label>
+                        <input type="number" id="estoqueAtual" name="estoqueAtual" step="1" min="0" value="0">
+                    </div>
+
+                    <div class="campo">
+                        <label for="estoqueMinimo">Estoque Mínimo</label>
+                        <input type="number" id="estoqueMinimo" name="estoqueMinimo" step="1" min="0" value="5">
+                    </div>
+                </div>
+            </section>
+
+            <!-- DADOS DO SERVIÇO -->
+            <section id="dadosServico" class="subdivisao" hidden>
+                <h2>Dados do Serviço</h2>
+
+                <div class="campo">
+                    <label for="duracaoItem">Duração (minutos)</label>
+                    <input type="number" id="duracaoItem" name="duracaoItem" step="1" min="1" value="30">
+                </div>
+            </section>
+
+            <!-- HISTÓRICO DE PREÇOS -->
+            <section id="historicoPreco" class="subdivisao" hidden>
+                <h2>Histórico de Preços</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Preço Anterior</th>
+                            <th>Novo Preço</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaHistoricoPreco"></tbody>
+                </table>
+            </section>
+
+            <!-- MOVIMENTAÇÃO DE ESTOQUE -->
+            <section id="movimentacaoEstoque" class="subdivisao" hidden>
+                <h2>Movimentação de Estoque</h2>
+
+                <div class="dadosGrupo">
+                    <div class="campo">
+                        <label for="tipoMovimento">Tipo</label>
+                        <select id="tipoMovimento">
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SAIDA">Saída</option>
+                            <option value="AJUSTE">Ajuste</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="quantidadeMovimento">Quantidade</label>
+                        <input type="number" id="quantidadeMovimento" step="1" min="1">
+                    </div>
+
+                    <div class="campo">
+                        <label for="motivoMovimento">Motivo</label>
+                        <input type="text" id="motivoMovimento" placeholder="Ex.: compra de fornecedor">
+                    </div>
+
+                    <button type="button" id="btnRegistrarMovimento">Registrar Movimentação</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Quantidade</th>
+                            <th>Anterior</th>
+                            <th>Posterior</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaMovimentos"></tbody>
+                </table>
+            </section>
+
+            <!-- AÇÕES DO FORMULÁRIO -->
+            <div id="acoesFormulario">
+                <button type="button" id="btnSalvarItem">Salvar</button>
+                <button type="button" id="btnEditarItem">Editar</button>
+                <button type="button" id="btnExcluirItem">Excluir</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="cadastroItens.js"></script>
+</body>
+
+</html>
